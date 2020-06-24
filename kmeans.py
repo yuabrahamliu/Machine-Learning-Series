@@ -159,7 +159,16 @@ class KMeans(object):
             
         return centroids
     
-    def plot_converge(self, X, idx, initial_idx):
+    def plot_converge(self, X, idx, initial_idx): 
+        """
+        Plot the samples in a 2-D scatter plot and label the clusters using 
+        convex hulls
+        @X: DataFrame, each row is a sample and each column is a feature (The 
+            number of features must be 2)
+        @idx: array with elements as cluster IDs of the samples in X
+        @initial_idx: the initialized centrods (randomly selected sampels) 
+                      at the beginning of k-means clustering
+        """
         plt.cla()
         #Clear the current axes
         
@@ -167,24 +176,30 @@ class KMeans(object):
         plt.xlabel(X.columns[0])
         plt.ylabel(X.columns[1])
         
-        plt.scatter(X.ix[:, 0], X.ix[:, 1], c = 'lightcoral')
+        Xarray = np.array(X)
+        #Create an array Xarray from the DataFrame X, and then transfer this 
+        #array Xarray to plt.scatter to draw the scatter plot, not transfer 
+        #the DataFrame X, because plt.scatter will automatically generate 
+        #a legend label for DataFrame using the last variable name, which may 
+        #disturb the final legend setting step. If use the array Xarray 
+        #instead, plt.scatter will not automatically generate a legend label
+        
+        plt.scatter(Xarray[:, 0], Xarray[:, 1], c = 'lightcoral')
         #plt.scatter(x, y) Make a scatter plot of `x` vs `y`
         #  x, y: array_like, shape(n,)
         #  c: color, sequence, or sequence of color. default: 'b'.
-        plt.scatter(X.ix[initial_idx, 0], X.ix[initial_idx, 1], 
+        plt.scatter(Xarray[initial_idx, 0], Xarray[initial_idx, 1], 
                     label = 'initial center', c = 'k')
         
         for i in range(self.k):
-            X_i = X[idx == i]
+            X_i = Xarray[idx == i]
             #Here, idx is a 1-d array with a length of 30, and its elements are 
             #the original cluster IDs (0 based numbers) of the 30 samples. Hence, 
             #idx == i is also a 1-d array with a length of 30, and its elements 
             #are blean values inidicating whether the samples belong to the 
             #original cluster with an ID of number i.
-            #The command X.ix[idx == i] uses blean value array idx == i to select 
-            #rows from the DataFrame X. Because idx == i only contains blean 
-            #values without numbers in the index of DataFrame X, this selection 
-            #is independent of the DataFrame index value.
+            #The command Xarray[idx == i] uses blean value array idx == i to 
+            #select rows from the array Xarray.
             
             hull = ConvexHull(X_i).vertices.tolist()
             hull.append(hull[0])
@@ -197,13 +212,19 @@ class KMeans(object):
             #                            For 2-D convex hulls, the vertices are 
             #                            in counterclockwise order.
             #array.tolist() Return the array as a (possible nested) list.
-            hullidx = X_i.index[hull]
-            plt.plot(X_i.ix[hullidx, 0], X_i.ix[hullidx, 1], 'c--')
+
+            plt.plot(X_i[hull, 0], X_i[hull, 1], 'c--')
             #Plot lines and/or markers
             #By default, each line is assigned a different style specified by 
             #a 'style cycle'
             #``'--'`` dashed line style
             #'c' cyan color
+            
+            #X_i[hull, 0] is an array. Transfer this array to plt.plot, rather 
+            #than a DataFrame, because for a DataFrame, plt.plot will 
+            #automatically create a legend label for it using its last variable 
+            #name, which will disturb the final legend setting step. If use an 
+            #array instead, plt.plot will not automatically generate a legend label
         
         plt.legend()
         #plt.legend Place a legend on the axes.
@@ -215,16 +236,21 @@ class KMeans(object):
         #the artist(plt.scatter(X.ix[initial_idx, 0], X.ix[initial_idx, 1], 
         #                       LABEL = 'initial center', c = 'k') here). You 
         #can specify them either at artist creation or by calling the 
-        #set_label() method on the artist.                   
-        
+        #set_label() method on the artist.
 
-            
-        
-        
-        
+        plt.pause(0.5)
+        #plt.pause(interval) Pause for *interval* seconds.        
     
     def fit(self, X, initial_centroid_index = None, max_iters = 10, seed = 16, 
             plt_process = False):
+        """
+        Do k-means clustering and return the final cluster IDs of the samples 
+        (0 based numbers) and the centroids of clusters. If set parameter 
+        plt_process = True, and the number of features is 2, will also draw 
+        the samples in a 2-D scatter plot and label the sample clusters using 
+        convex hulls.
+        @X: DataFrame, each row is a sample and each column is a feature
+        """
         m, n = X.shape
         
         #If no specific centroid is assigned, initalize the centroids randomly
@@ -245,6 +271,7 @@ class KMeans(object):
         idx = None
         
         plt.ion()
+        #plt.ion Turn interactive mode on
         for _ in range(max_iters):
         #Here, _ is a dummy variable
             #Assign samples to the clusters according to the original cluster centroids
@@ -252,7 +279,8 @@ class KMeans(object):
             
             if plt_process:
                 if(X.shape[1] == 2):
-                    self.plot_converge(X, idx, initial_centroid_index)
+                    self.plot_converge(X, idx, 
+                                       initial_idx = initial_centroid_index)
                 else:
                     print "To draw the k-means converge process, the number \
                     of features must be 2"
@@ -264,12 +292,20 @@ class KMeans(object):
         
         
         plt.ioff()
+        #plt.ioff Turn interactive mode off
+        
+        plt.show()
+        #plt.show Display a figure. When running in ipython with its pylab mode, 
+        #  display all figures and return to the ipython prompt.
+        
+        return centroid, idx
     
+#%%
+if __name__ == '__main__':
+    centroid, idx = KMeans(3).fit(watermelon, plt_process=True, seed=24, 
+                          max_iters=10)
     
-    
-
-
-
-
+#%%
+%reset
 
 
