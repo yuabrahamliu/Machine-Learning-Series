@@ -81,7 +81,6 @@ for i in doc_set:
 
 #turn the tokenized documents into an id <-> term dictionary
 dictionary = corpora.Dictionary(texts)
-
 print(dictionary.token2id)
 #{'brocolli': 0, 'brother': 1, 'eat': 2, 'good': 3, 'like': 4, 'mother': 5, 
 #'around': 6, 'basebal': 7, 'drive': 8, 'lot': 9, 'practic': 10, 'spend': 11, 
@@ -116,7 +115,8 @@ ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics = 2,
                                            id2word = dictionary, passes = 20, 
                                            random_state = 2023)
 #gensim.models.ldamodel.LdaModel(corpus = None, num_topics = 100, 
-#  id2word = None, chunksize = 2000, passes = 1, update_every = 1)
+#  id2word = None, passes = 1, random_state = None, 
+#  chunksize = 2000, update_every = 1)
 #Train and use Online Latent Dirichlet Allocation model as presented in 
 #`'Online Learning for LDA' by Hoffman et al.`_
 #corpus: iterable of list of (int, float), optional.
@@ -128,14 +128,14 @@ ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics = 2,
 #id2word: {dict of (int, str), :class:`gensim.corpora.dictionary.Dictionary`}
 #  Mapping from word IDs to words. It is used to determine the vocabulary size, 
 #  as well as for debugging and topic printing.
-#chunksize: int, optinal. Number of documents to be used in each training chunk. 
 #passes: int, optional. Number of passes through the corpus during training. The 
 #  greater the number of passes, the more accurate the model will be. A lot of 
 #  passes can be slow on a very large corpus.
-#update_every: int, optional. Number of documents to be iterated through for each 
-#  update. Set to 0 for batch learning, > 1 for online iterative learning.
 #random_state: {np.random.RandomState, int}, optinal. Either a randomState object 
 #  or a seed to generate one. Useful for reproducibility.
+#chunksize: int, optinal. Number of documents to be used in each training chunk. 
+#update_every: int, optional. Number of documents to be iterated through for each 
+#  update. Set to 0 for batch learning, > 1 for online iterative learning.
 
 #Adjusting the model's number of topics and passes is important to getting a good 
 #result.
